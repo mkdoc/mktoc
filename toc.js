@@ -2,17 +2,40 @@ var through = require('through3')
   , mkast = require('mkast')
   , Node = mkast.Node
   , collect = mkast.NodeWalker.collect
-  , MARKER = '@toc';
+  , MARKER = '@toc'
+  , ORDERED = 'ordered'
+  , BULLET = 'bullet'
+  , HASH = '#';
 
 /**
  *  Create a table of contents index stream.
+ *
+ *  Note that in order to build a complete index all data must be read so this 
+ *  implementation buffers incoming nodes and flushes them when the stream 
+ *  is ended writing the index nodes where necessary.
+ *
+ *  If the `standalone` option is given then the incoming data is discarded 
+ *  and the document representing the index is flushed.
+ *
+ *  When a `destination` function is specified it is passed a string 
+ *  literal of the heading text and should return a URL, the function is 
+ *  invoked in the scope of this stream.
+ *
+ *  Typically `prefix` will be either a `/`, `#` or the empty string 
+ *  depending upon whether you want absolute, anchor or relative links. The 
+ *  default is to use `#` for anchor links on the same page.
  *
  *  @constructor Toc
  *  @param {Object} [opts] processing options.
  *
  *  @option {Boolean} [standalone] discard incoming data.
  *  @option {String=bullet} [type] list output type, `bullet` or `ordered`.
- *  @option {Booleani=true} [link] whether to create links in the output lists.
+ *  @option {Boolean=true} [link] whether to create links in the output lists.
+ *  @option {Number=1} [depth] ignore headings below this level.
+ *  @option {Number=6} [max] ignore headings above this level.
+ *  @option {Function} [destination] builds the link URLs.
+ *  @option {String=#} [prefix] default link prefix.
+ *  @option {String} [base] a base path for absolute links.
  */
 function Toc(opts) {
 
@@ -21,8 +44,8 @@ function Toc(opts) {
   this.standalone = opts.standalone !== undefined 
     ? opts.standalone : false;
 
-  this.type = opts.type === 'ordered' || opts.type === 'bullet'
-    ? opts.type : 'bullet';
+  this.type = opts.type === ORDERED || opts.type === BULLET
+    ? opts.type : BULLET;
 
   // do we create links, calls destination()
   this.link = opts.link !== undefined ? opts.link : true;
@@ -30,6 +53,17 @@ function Toc(opts) {
   // initial depth, headings below this depth are ignored
   this.depth = typeof opts.depth === 'number' && opts.depth > 0
     ? opts.depth : 1;
+
+  // maximum depth, headings above this depth are ignored
+  this.max = typeof opts.max === 'number' && opts.max > 0
+    ? opts.max : 6;
+
+  var dest = typeof opts.destination === 'function'
+    ? opts.destination : destination;
+  this.destination = dest.bind(this);
+
+  this.prefix = typeof opts.prefix === 'string' ? opts.prefix : HASH;
+  this.base = typeof opts.base === 'string' ? opts.base : '';
 
   // document to hold the TOC list
   this.doc = Node.createDocument();
@@ -39,10 +73,6 @@ function Toc(opts) {
 
   // nodes to push() between document and EOF
   this.nodes = [];
-
-  var dest = typeof opts.destination === 'function'
-    ? opts.destination : destination;
-  this.destination = dest.bind(this);
 
   // if user specifed a title then append it to the beginning
   if(opts.title) {
@@ -73,8 +103,8 @@ function transform(chunk, encoding, cb) {
   var list
     // list item
     , item
-    // paragraph
-    , para = Node.createNode(Node.PARAGRAPH)
+    // container element: paragraph or link
+    , container
     // collection of child text nodes
     , text
     // current target item or list
@@ -90,7 +120,8 @@ function transform(chunk, encoding, cb) {
 
   if(Node.is(chunk, Node.HEADING)) {
 
-    if(chunk.level < this.depth) {
+    // ignore these levels
+    if(chunk.level < this.depth || chunk.level > this.max) {
       return cb(); 
     }
 
@@ -104,24 +135,25 @@ function transform(chunk, encoding, cb) {
       return cb();
     }
 
+    container = Node.createNode(Node.PARAGRAPH);
+
     text = collect(chunk, Node.TEXT);
 
     if(this.link) {
       link = Node.createNode(Node.LINK);
-      //link.appendChild(para);
-      para = link;
+      container = link;
     }
 
     text.forEach(function(txt) {
       literal += txt.literal;
-      para.appendChild(Node.deserialize(txt));
+      container.appendChild(Node.deserialize(txt));
     })
 
     if(link) {
       link.destination = this.destination(literal);
     }
 
-    item.appendChild(para);
+    item.appendChild(container);
 
     // level 1 headings go into primary list
     if(chunk.level === this.depth) {
@@ -263,7 +295,7 @@ function destination(literal) {
   }else{
     this.seen[str]++;
   }
-  return '#' + str;
+  return this.base + this.prefix + str;
 }
 
 Toc.prototype.print = print;

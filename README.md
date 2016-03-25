@@ -22,9 +22,7 @@ For the command line interface install [mkdoc][] globally (`npm i -g mkdoc`).
 - [Help](#help)
 - [API](#api)
    - [toc](#toc)
-     - [Options](#options)
    - [Toc](#toc-1)
-     - [Options](#options-1)
 - [License](#license)
 
 ---
@@ -70,9 +68,10 @@ mktoc [options]
 Generates a table of contents index.
 
   -t, --title=[TITLE]  Set initial heading
-  -l, --level=[NUM]    Set initial heading level
-  -d, --depth=[NUM]    Ignore headings below a depth
-  -s, --standalone     Create standalone index
+  -l, --level=[NUM]    Set level for initial heading
+  -d, --depth=[LEVEL]  Ignore headings below LEVEL
+  -m, --max=[LEVEL]    Ignore headings above LEVEL
+  -s, --standalone     Standalone index, discards input
   -h, --help           Display this help and exit
   --version            Print the version and exit
 
