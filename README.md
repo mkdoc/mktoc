@@ -12,7 +12,7 @@ To inject the created list into a location in the document place the marker `<!-
 
 By default it creates anchor links (`#`) to named anchors on the same page but the link behaviour may be disabled or customized using a `destination` function, see the [api docs](#api).
 
-## [Install](https://github.com/mkdoc/mktoc/blob/master/)
+## Install
 
 ```
 npm i mktoc --save
@@ -22,7 +22,7 @@ For the command line interface install [mkdoc][] globally (`npm i -g mkdoc`).
 
 ---
 
-- [Install](https://github.com/mkdoc/mktoc/blob/master/)
+- [Install](#install)
 - [Usage](#usage)
 - [Example](#example)
 - [Help](#help)
