@@ -31,6 +31,7 @@ function Toc(opts) {
 
   // root list for the hierarchy
   this.list = Node.createNode(Node.LIST, this.getListData(this.type, 0));
+  this.list._lastLineBlank = true;
   this.nodes.push(this.list);
 
   // current list of item
@@ -123,6 +124,12 @@ function transform(chunk, encoding, cb) {
 }
 
 function print(suppress) {
+
+  // nothing to do
+  if(!this.nodes.length) {
+    return; 
+  }
+
   if(!suppress) {
     this.push(this.doc);
   }
@@ -137,12 +144,29 @@ function print(suppress) {
 }
 
 function flush(cb) {
+  var i
+    , chunk
+    , node;
   if(this.standalone) {
     this.print();
   }else{
     // pass through input chunks
-    for(var i = 0;i < this.input.length;i++) {
-      this.push(this.input[i]);
+    for(i = 0;i < this.input.length;i++) {
+      chunk = this.input[i];
+      if(Node.is(chunk, Node.HTML_BLOCK)
+        && chunk.htmlBlockType === 2
+        && chunk.literal
+        && ~chunk.literal.indexOf('@toc')) {
+
+        // consume the TOC nodes so nothing is printed at the end
+        while((node = this.nodes.shift())) {
+          this.push(node);
+        }
+
+        // skip the injection marker
+        continue;
+      }
+      this.push(chunk);
     }
     // apppend TOC document
     this.print();

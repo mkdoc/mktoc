@@ -12,6 +12,8 @@ Create the stream and write a [commonmark][] document:
 
 <? @source {javascript=s/\.\.\/index/mktoc/gm} usage.js ?>
 
+<!-- @toc -->
+
 <? @include {=readme} help.md ?>
 
 <? @exec mkapi index.js --title=API --level=2 ?>

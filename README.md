@@ -27,6 +27,8 @@ ast.src('# Heading\n\n## Sub Heading\n\n')
   .pipe(process.stdout);
 ```
 
+<!-- @toc -->
+
 ## Help
 
 ```
