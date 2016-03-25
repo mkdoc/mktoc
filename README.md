@@ -22,9 +22,9 @@ For the command line interface install [mkdoc][] globally (`npm i -g mkdoc`).
    - [API](#api)
      - [toc](#toc)
        - [Options](#options)
-         - [Options](#options-1)
      - [Toc](#toc-1)
-     - [License](#license)
+       - [Options](#options-1)
+   - [License](#license)
 
 ## Usage
 

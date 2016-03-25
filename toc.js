@@ -6,17 +6,13 @@ var through = require('through3')
 
 function gfm(text) {
   text = text.toLowerCase();
-  //console.log('gfm start %s', text);
   text = text.replace(/[^A-Z0-9a-z _-]/g, '');
-  //console.log('gfm after strip %s', text);
   text = text.replace(/( )/g, '-');
   text = text.replace(/-{2,}/g, '-');
-  //console.log('gfm final %s', text);
   return text;
 }
 
 function destination(literal) {
-  console.error(literal)
   if(!this.seen) {
     this.seen = {}; 
   }
@@ -136,17 +132,16 @@ function transform(chunk, encoding, cb) {
       para.appendChild(Node.deserialize(txt));
     })
 
+    //console.error(literal);
+
     if(link) {
       link.destination = this.destination(literal);
     }
-
-    //console.error(literal)
 
     item.appendChild(para);
 
     // level 1 headings go into primary list
     if(chunk.level === 1) {
-
       // coming back from deeper - create a new list
       if(this.level > 1) {
         this.list = Node.createNode(Node.LIST, this.getListData());
@@ -156,7 +151,6 @@ function transform(chunk, encoding, cb) {
       this.current = item;
     // other headings look for parents
     }else{
-      //console.error('level: %s', chunk.level);
       target = this.current || this.list;
 
       //if(Node.is(target, Node.ITEM)) {
@@ -164,6 +158,7 @@ function transform(chunk, encoding, cb) {
         list = Node.createNode(Node.LIST, this.getListData());
         // descending into a nested level
         if(chunk.level > this.level) {
+          //console.error('descending: ' + literal);
           target.appendChild(list);
           target = this.current = list;
         // ascending back up level(s)
@@ -174,7 +169,7 @@ function transform(chunk, encoding, cb) {
             target = target.parent; 
           }
           target.appendChild(list);
-          //target = list;
+          this.current = target;
         }
       }
 
