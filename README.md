@@ -27,7 +27,14 @@ ast.src('# Heading\n\n## Sub Heading\n\n')
   .pipe(process.stdout);
 ```
 
-<!-- @toc -->
+- Contents Index
+   - Install
+   - Usage
+   - Help
+   - API
+     - toc
+       - Options
+   - License
 
 ## Help
 

@@ -154,7 +154,7 @@ function flush(cb) {
     for(i = 0;i < this.input.length;i++) {
       chunk = this.input[i];
       if(Node.is(chunk, Node.HTML_BLOCK)
-        && chunk.htmlBlockType === 2
+        && (chunk.htmlBlockType === 2 || chunk._htmlBlockType === 2)
         && chunk.literal
         && ~chunk.literal.indexOf('@toc')) {
 
