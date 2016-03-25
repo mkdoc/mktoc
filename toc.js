@@ -53,7 +53,7 @@ function Toc(opts) {
     ? opts.standalone : false;
 
   this.type = opts.type === ORDERED || opts.type === BULLET
-    ? opts.type : BULLET;
+    ? opts.type : ORDERED;
 
   // do we create links, calls destination()
   this.link = opts.link !== undefined ? opts.link : true;
@@ -94,7 +94,7 @@ function Toc(opts) {
   }
 
   // root list for the hierarchy
-  this.list = Node.createNode(Node.LIST, this.getListData(this.type, 0));
+  this.list = Node.createNode(Node.LIST, this.getListData(0));
   this.nodes.push(this.list);
 
   // current list of item
@@ -102,6 +102,10 @@ function Toc(opts) {
 
   // current level
   this.level = 0;
+
+  if(this.type === ORDERED) {
+    this.counters = []; 
+  }
 }
 
 /**
@@ -135,9 +139,18 @@ function transform(chunk, encoding, cb) {
       return cb(); 
     }
 
+    if(this.counters) {
+      this.counters[chunk.level] = this.counters[chunk.level] || 0;
+      this.counters[chunk.level]++;
+    }
+
+    if(this.counters && chunk.level > this.level) {
+      this.counters[chunk.level] = 1;
+    }
+
     item = Node.createNode(
         Node.ITEM,
-        this.getListData(this.type, chunk.level === this.depth ? 0 : 2));
+        this.getListData(chunk.level, chunk.level === this.depth ? 0 : 2));
 
     // preserve headings that are already links
     if(Node.is(chunk.firstChild, Node.LINK)) {
@@ -168,7 +181,7 @@ function transform(chunk, encoding, cb) {
     if(chunk.level === this.depth) {
       // coming back from deeper - create a new list
       if(this.level > this.depth) {
-        this.list = Node.createNode(Node.LIST, this.getListData());
+        this.list = Node.createNode(Node.LIST, this.getListData(chunk.level));
         this.nodes.push(this.list);
       }
       this.list.appendChild(item);
@@ -179,10 +192,11 @@ function transform(chunk, encoding, cb) {
 
       //if(Node.is(target, Node.ITEM)) {
       if(chunk.level !== this.level) {
-        list = Node.createNode(Node.LIST, this.getListData());
+
+
+        list = Node.createNode(Node.LIST, this.getListData(chunk.level));
         // descending into a nested level
         if(chunk.level > this.level) {
-          //console.error('descending: ' + literal);
           target.appendChild(list);
           target = this.current = list;
         // ascending back up level(s)
@@ -194,11 +208,13 @@ function transform(chunk, encoding, cb) {
           }
           target.appendChild(list);
           this.current = target;
+
         }
       }
 
       target.appendChild(item);
     }
+
 
     // store current level
     this.level = chunk.level;
@@ -235,11 +251,8 @@ function flush(cb) {
     , node
     , j = this.nodes.length;
 
-  //console.error(j)
-
   while(j--) {
     chunk = this.nodes[j];
-    //console.error(chunk.type);
     if(Node.is(chunk, Node.LIST)) {
       chunk._lastLineBlank = true; 
       break;
@@ -277,16 +290,29 @@ function flush(cb) {
  *
  *  @private
  */
-function getListData(type, padding) {
-  return {
+function getListData(level, padding, markerOffset) {
+  var data = {
     _listData: {
-      type: type || BULLET,
+      type: this.type,
       tight: true,
-      bulletChar: this.bulletChar,
-      padding: padding || 2,
-      markerOffset: 0
+      padding: padding !== undefined ? padding : 2,
+      markerOffset: markerOffset || 0
     }
   }
+
+  if(this.counters) {
+    var delimiter = '.';
+
+    data._listData.start = this.counters[level]; 
+    data._listData.delimiter = delimiter;
+
+    // the +1 accounts for the single space
+    data._listData.padding = (this.counters[level] + delimiter).length + 1;
+  }else{
+    data._listData.bulletChar = this.bulletChar;
+  }
+
+  return data;
 }
 
 /**
