@@ -17,6 +17,10 @@ var through = require('through3')
  *  implementation buffers incoming nodes and flushes them when the stream 
  *  is ended writing the index nodes where necessary.
  *
+ *  When the first child of a heading is a link it is preserved and no 
+ *  automatic link is created, otherwise when creating links inline markup 
+ *  in the heading is discarded.
+ *
  *  If the `standalone` option is given then the incoming data is discarded 
  *  and the document representing the index is flushed.
  *
@@ -29,8 +33,6 @@ var through = require('through3')
  *  default is to use `#` for anchor links on the same page.
  *
  *  If the `bullet` option is given it must be one of `-`, `+` or `*`.
- *
- *  Note that when creating links inline markup in the heading will be lost.
  *
  *  @constructor Toc
  *  @param {Object} [opts] processing options.
@@ -54,6 +56,7 @@ function Toc(opts) {
 
   this.type = opts.type === ORDERED || opts.type === BULLET
     ? opts.type : ORDERED;
+    //? opts.type : BULLET;
 
   // do we create links, calls destination()
   this.link = opts.link !== undefined ? opts.link : true;
@@ -155,27 +158,26 @@ function transform(chunk, encoding, cb) {
     // preserve headings that are already links
     if(Node.is(chunk.firstChild, Node.LINK)) {
       item.appendChild(Node.deserialize(chunk.firstChild));
-      return cb();
-    }
-
-    text = collect(chunk, Node.TEXT);
-
-    if(this.link) {
-      container = Node.createNode(Node.LINK);
     }else{
-      container = Node.createNode(Node.PARAGRAPH);
+      text = collect(chunk, Node.TEXT);
+
+      if(this.link) {
+        container = Node.createNode(Node.LINK);
+      }else{
+        container = Node.createNode(Node.PARAGRAPH);
+      }
+
+      text.forEach(function(txt) {
+        literal += txt.literal;
+        container.appendChild(Node.deserialize(txt));
+      })
+
+      if(this.link) {
+        container.destination = this.destination(literal);
+      }
+
+      item.appendChild(container);
     }
-
-    text.forEach(function(txt) {
-      literal += txt.literal;
-      container.appendChild(Node.deserialize(txt));
-    })
-
-    if(this.link) {
-      container.destination = this.destination(literal);
-    }
-
-    item.appendChild(container);
 
     // level 1 headings go into primary list
     if(chunk.level === this.depth) {

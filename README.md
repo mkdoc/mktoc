@@ -12,7 +12,7 @@ To inject the created list into a location in the document place the marker `<!-
 
 By default it creates anchor links (`#`) to named anchors on the same page but the link behaviour may be disabled or customized using a `destination` function, see the [api docs](#api).
 
-## [Install](https://github.com/mkdoc/mktoc/blob/master/installation)
+## [Install](https://github.com/mkdoc/mktoc/blob/master/)
 
 ```
 npm i mktoc --save
@@ -22,13 +22,14 @@ For the command line interface install [mkdoc][] globally (`npm i -g mkdoc`).
 
 ---
 
-1. [Usage](#usage)
-2. [Example](#example)
-3. [Help](#help)
-4. [API](#api)
+1. [Install](https://github.com/mkdoc/mktoc/blob/master/)
+2. [Usage](#usage)
+3. [Example](#example)
+4. [Help](#help)
+5. [API](#api)
    1. [toc](#toc)
    2. [Toc](#toc-1)
-5. [License](#license)
+6. [License](#license)
 
 ---
 
@@ -126,6 +127,10 @@ Note that in order to build a complete index all data must be read so this
 implementation buffers incoming nodes and flushes them when the stream
 is ended writing the index nodes where necessary.
 
+When the first child of a heading is a link it is preserved and no
+automatic link is created, otherwise when creating links inline markup
+in the heading is discarded.
+
 If the `standalone` option is given then the incoming data is discarded
 and the document representing the index is flushed.
 
@@ -138,8 +143,6 @@ depending upon whether you want absolute, anchor or relative links. The
 default is to use `#` for anchor links on the same page.
 
 If the `bullet` option is given it must be one of `-`, `+` or `*`.
-
-Note that when creating links inline markup in the heading will be lost.
 
 * `opts` Object processing options.
 

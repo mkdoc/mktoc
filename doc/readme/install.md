@@ -1,4 +1,4 @@
-## [Install](/installation)
+## [Install](/)
 
 ```
 npm i mktoc --save
