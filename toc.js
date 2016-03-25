@@ -36,6 +36,8 @@ var through = require('through3')
  *
  *  If the `bullet` option is given it must be one of `-`, `+` or `*`.
  *
+ *  If the `delimiter` option is given it must be `)` or `.`.
+ *
  *  @constructor Toc
  *  @param {Object} [opts] processing options.
  *
@@ -48,6 +50,7 @@ var through = require('through3')
  *  @option {String=#} [prefix] default link prefix.
  *  @option {String} [base] a base path for absolute links.
  *  @option {String=-} [bullet] character for bullet lists.
+ *  @option {String=)} [delimiter] delimiter for ordered lists.
  */
 function Toc(opts) {
 

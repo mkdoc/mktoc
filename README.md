@@ -153,6 +153,8 @@ default is to use `#` for anchor links on the same page.
 
 If the `bullet` option is given it must be one of `-`, `+` or `*`.
 
+If the `delimiter` option is given it must be `)` or `.`.
+
 * `opts` Object processing options.
 
 #### Options
@@ -166,6 +168,7 @@ If the `bullet` option is given it must be one of `-`, `+` or `*`.
 * `prefix` String=# default link prefix.
 * `base` String a base path for absolute links.
 * `bullet` String=- character for bullet lists.
+* `delimiter` String=) delimiter for ordered lists.
 
 ## License
 
