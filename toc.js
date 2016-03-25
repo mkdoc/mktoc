@@ -28,6 +28,8 @@ var through = require('through3')
  *  depending upon whether you want absolute, anchor or relative links. The 
  *  default is to use `#` for anchor links on the same page.
  *
+ *  If the `bullet` option is given it must be one of `-`, `+` or `*`.
+ *
  *  @constructor Toc
  *  @param {Object} [opts] processing options.
  *

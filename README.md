@@ -135,6 +135,8 @@ Typically `prefix` will be either a `/`, `#` or the empty string
 depending upon whether you want absolute, anchor or relative links. The
 default is to use `#` for anchor links on the same page.
 
+If the `bullet` option is given it must be one of `-`, `+` or `*`.
+
 * `opts` Object processing options.
 
 #### Options
@@ -147,6 +149,7 @@ default is to use `#` for anchor links on the same page.
 * `destination` Function builds the link URLs.
 * `prefix` String=# default link prefix.
 * `base` String a base path for absolute links.
+* `bullet` String=- character for bullet lists.
 
 ## License
 
