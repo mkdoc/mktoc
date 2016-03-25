@@ -5,8 +5,19 @@ var through = require('through3')
 
 function Toc(opts) {
 
+  // when standalone all other data apart from the generated TOC
+  // document is removed from the stream
+  this.standalone = opts.standalone !== undefined 
+    ? opts.standalone : false;
+
+  this.type = opts.type === 'ordered' || opts.type === 'bullet'
+    ? opts.type : 'bullet';
+
   // document to hold the TOC list
   this.doc = Node.createDocument();
+
+  // input chunks we received
+  this.input = [];
 
   // nodes to push() between document and EOF
   this.nodes = [];
@@ -16,13 +27,11 @@ function Toc(opts) {
     var title = Node.createNode(Node.HEADING, {level: opts.level || 1});
     title.appendChild(Node.createNode(Node.TEXT, {literal: opts.title}));
     this.nodes.push(title);
-    //this.doc.appendChild(title);
   }
 
   // root list for the hierarchy
-  this.list = Node.createNode(Node.LIST, this.getListData());
+  this.list = Node.createNode(Node.LIST, this.getListData(this.type, 0));
   this.nodes.push(this.list);
-  //this.doc.appendChild(this.list);
 
   // current list of item
   this.current = null;
@@ -49,7 +58,7 @@ function transform(chunk, encoding, cb) {
     // current target item or list
     , target;
 
-  item = Node.createNode(Node.ITEM, this.getListData());
+  item = Node.createNode(Node.ITEM, this.getListData(this.type));
 
   if(Node.is(chunk, Node.HEADING)) {
 
@@ -79,12 +88,25 @@ function transform(chunk, encoding, cb) {
       this.current = item;
     // other headings look for parents
     }else{
+      //console.error('level: %s', chunk.level);
       target = this.current || this.list;
 
-      if(Node.is(target, Node.ITEM)) {
+      //if(Node.is(target, Node.ITEM)) {
+      if(chunk.level !== this.level) {
         list = Node.createNode(Node.LIST, this.getListData());
-        target.appendChild(list);
-        target = this.current = list;
+        // descending into a nested level
+        if(chunk.level > this.level) {
+          target.appendChild(list);
+          target = this.current = list;
+        // ascending back up level(s)
+        }else{
+          var diff = this.level - chunk.level;
+          target = this.current.parent;
+          while(--diff) {
+            target = target.parent; 
+          }
+          target.appendChild(list);
+        }
       }
 
       target.appendChild(item);
@@ -94,15 +116,37 @@ function transform(chunk, encoding, cb) {
     this.level = chunk.level;
   }
 
+  if(!this.standalone) {
+    this.input.push(chunk); 
+  }
   cb();
 }
 
-function flush(cb) {
-  this.push(this.doc);
+function print(suppress) {
+  if(!suppress) {
+    this.push(this.doc);
+  }
+
   for(var i = 0;i < this.nodes.length;i++) {
     this.push(this.nodes[i]);
   }
-  this.push(Node.createNode(Node.EOF));
+
+  if(!suppress) {
+    this.push(Node.createNode(Node.EOF));
+  }
+}
+
+function flush(cb) {
+  if(this.standalone) {
+    this.print();
+  }else{
+    // pass through input chunks
+    for(var i = 0;i < this.input.length;i++) {
+      this.push(this.input[i]);
+    }
+    // apppend TOC document
+    this.print();
+  }
   cb();
 }
 
@@ -112,12 +156,13 @@ function getListData(type, padding, bulletChar) {
       type: type || 'bullet',
       tight: true,
       bulletChar: bulletChar || '-',
-      padding: padding || 1,
+      padding: padding || 2,
       markerOffset: 0
     }
   }
 }
 
+Toc.prototype.print = print;
 Toc.prototype.getListData = getListData;
 
 module.exports = through.transform(transform, flush, {ctor: Toc});

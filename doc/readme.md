@@ -1,4 +1,4 @@
-# Table of Contents
+# Contents Index
 
 <? @include readme/badges.md ?>
 

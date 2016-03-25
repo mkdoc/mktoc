@@ -1,4 +1,4 @@
-# Table of Contents
+# Contents Index
 
 [![Build Status](https://travis-ci.org/mkdoc/mktoc.svg?v=3)](https://travis-ci.org/mkdoc/mktoc)
 [![npm version](http://img.shields.io/npm/v/mktoc.svg?v=3)](https://npmjs.org/package/mktoc)
@@ -34,8 +34,9 @@ mktoc [options]
 
 Generates a table of contents index.
 
-  -h, --help  Display this help and exit
-  --version   Print the version and exit
+  -s, --standalone  Create standalone index
+  -h, --help        Display this help and exit
+  --version         Print the version and exit
 
 Report bugs to https://github.com/mkdoc/mktoc/issues
 ```
