@@ -153,7 +153,8 @@ default is to use `#` for anchor links on the same page.
 
 If the `bullet` option is given it must be one of `-`, `+` or `*`.
 
-If the `delimiter` option is given it must be `)` or `.`.
+If the `delimiter` option is given it must a period `.` or right
+parenthesis `)`.
 
 * `opts` Object processing options.
 
