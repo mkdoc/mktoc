@@ -34,9 +34,11 @@ mktoc [options]
 
 Generates a table of contents index.
 
-  -s, --standalone  Create standalone index
-  -h, --help        Display this help and exit
-  --version         Print the version and exit
+  -t, --title=[TITLE]  Set initial heading
+  -l, --level=[NUM]    Set initial heading level
+  -s, --standalone     Create standalone index
+  -h, --help           Display this help and exit
+  --version            Print the version and exit
 
 Report bugs to https://github.com/mkdoc/mktoc/issues
 ```
