@@ -4,6 +4,8 @@ var ast = require('mkast')
 /**
  *  Generate a document containing a table of contents list.
  *
+ *  See [Toc](#toc-1) for more available options.
+ *
  *  @function toc
  *  @param {Object} [opts] processing options.
  *  @param {Function} [cb] callback function.

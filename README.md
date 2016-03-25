@@ -102,6 +102,8 @@ toc([opts][, cb])
 
 Generate a document containing a table of contents list.
 
+See [Toc](#toc-1) for more available options.
+
 Returns an output stream.
 
 * `opts` Object processing options.

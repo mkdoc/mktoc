@@ -207,24 +207,26 @@ function transform(chunk, encoding, cb) {
   cb();
 }
 
-function print(suppress) {
+/**
+ *  Print the index document to the stream.
+ */
+function print() {
 
   // nothing to do
   if(!this.nodes.length) {
     return; 
   }
 
-  if(!suppress) {
-    this.push(this.doc);
-  }
+  // document
+  this.push(this.doc);
 
+  // list nodes
   for(var i = 0;i < this.nodes.length;i++) {
     this.push(this.nodes[i]);
   }
 
-  if(!suppress) {
-    this.push(Node.createNode(Node.EOF));
-  }
+  // eof
+  this.push(Node.createNode(Node.EOF));
 }
 
 function flush(cb) {
@@ -270,6 +272,11 @@ function flush(cb) {
   cb();
 }
 
+/**
+ *  Get a list data object.
+ *
+ *  @private
+ */
 function getListData(type, padding) {
   return {
     _listData: {
@@ -282,16 +289,24 @@ function getListData(type, padding) {
   }
 }
 
-// github style automatic header identifiers
+/**
+ *  Github style automatic header identifiers.
+ *
+ *  @private
+ */
 function gh(text) {
   text = text.toLowerCase();
   text = text.replace(/[^A-Z0-9a-z _-]/g, '');
-  text = text.replace(/( )/g, '-');
+  text = text.replace(/ /g, '-');
   text = text.replace(/-{2,}/g, '-');
   return text;
 }
 
-// default destination function
+/**
+ *  Default destination function.
+ *
+ *  @private
+ */
 function destination(literal) {
   if(!this.seen) {
     this.seen = {}; 
