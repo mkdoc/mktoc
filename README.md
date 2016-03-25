@@ -14,6 +14,18 @@ npm i mktoc --save
 
 For the command line interface install [mkdoc][] globally (`npm i -g mkdoc`).
 
+- [Contents Index](#contents-index)
+   - [Install](#install)
+   - [Usage](#usage)
+   - [Example](#example)
+   - [Help](#help)
+   - [API](#api)
+     - [toc](#toc)
+       - [Options](#options)
+         - [Options](#options-1)
+     - [Toc](#toc-1)
+     - [License](#license)
+
 ## Usage
 
 Create the stream and write a [commonmark][] document:
@@ -27,16 +39,19 @@ ast.src('# Heading\n\n## Sub Heading\n\n')
   .pipe(process.stdout);
 ```
 
-- [Contents Index](#contents-index)
-   - [Install](#install)
-   - [Usage](#usage)
-   - [Help](#help)
-   - [API](#api)
-     - [toc](#toc)
-       - [Options](#options)
-         - [Options](#options-1)
-     - [Toc](#toc-1)
-     - [License](#license)
+## Example
+
+Create a standalone table of contents:
+
+```shell
+mkcat README.md | mktoc -s | mkout > TOC.md
+```
+
+Inject the table of contents into a document containing the `<!-- @toc -->` marker:
+
+```shell
+mkcat readme.md | mktoc | mkout > README.md
+```
 
 ## Help
 
