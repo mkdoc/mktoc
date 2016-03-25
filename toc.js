@@ -4,34 +4,6 @@ var through = require('through3')
   , collect = mkast.NodeWalker.collect
   , MARKER = '@toc';
 
-function gfm(text) {
-  text = text.toLowerCase();
-  text = text.replace(/[^A-Z0-9a-z _-]/g, '');
-  text = text.replace(/( )/g, '-');
-  text = text.replace(/-{2,}/g, '-');
-  return text;
-}
-
-function destination(literal) {
-  if(!this.seen) {
-    this.seen = {}; 
-  }
-
-  var str = gfm(literal);
-
-  if(this.seen[str]) {
-    str += '-' + this.seen[str];
-  }
-
-  if(!this.seen[str]) {
-    this.seen[str] = 1; 
-  }else{
-    this.seen[str]++;
-  }
-
-  return '#' + str;
-}
-
 /**
  *  Create a table of contents index stream.
  *
@@ -55,6 +27,10 @@ function Toc(opts) {
   // do we create links, calls destination()
   this.link = opts.link !== undefined ? opts.link : true;
 
+  // initial depth, headings below this depth are ignored
+  this.depth = typeof opts.depth === 'number' && opts.depth > 0
+    ? opts.depth : 1;
+
   // document to hold the TOC list
   this.doc = Node.createDocument();
 
@@ -77,7 +53,6 @@ function Toc(opts) {
 
   // root list for the hierarchy
   this.list = Node.createNode(Node.LIST, this.getListData(this.type, 0));
-  this.list._lastLineBlank = true;
   this.nodes.push(this.list);
 
   // current list of item
@@ -109,9 +84,19 @@ function transform(chunk, encoding, cb) {
     // encapsulating link when `link` option is set
     , link;
 
-  item = Node.createNode(Node.ITEM, this.getListData(this.type));
+  if(!this.standalone) {
+    this.input.push(chunk); 
+  }
 
   if(Node.is(chunk, Node.HEADING)) {
+
+    if(chunk.level < this.depth) {
+      return cb(); 
+    }
+
+    item = Node.createNode(
+        Node.ITEM,
+        this.getListData(this.type, chunk.level === this.depth ? 0 : 2));
 
     // preserve headings that are already links
     if(Node.is(chunk.firstChild, Node.LINK)) {
@@ -132,8 +117,6 @@ function transform(chunk, encoding, cb) {
       para.appendChild(Node.deserialize(txt));
     })
 
-    //console.error(literal);
-
     if(link) {
       link.destination = this.destination(literal);
     }
@@ -141,9 +124,9 @@ function transform(chunk, encoding, cb) {
     item.appendChild(para);
 
     // level 1 headings go into primary list
-    if(chunk.level === 1) {
+    if(chunk.level === this.depth) {
       // coming back from deeper - create a new list
-      if(this.level > 1) {
+      if(this.level > this.depth) {
         this.list = Node.createNode(Node.LIST, this.getListData());
         this.nodes.push(this.list);
       }
@@ -180,9 +163,6 @@ function transform(chunk, encoding, cb) {
     this.level = chunk.level;
   }
 
-  if(!this.standalone) {
-    this.input.push(chunk); 
-  }
   cb();
 }
 
@@ -209,7 +189,20 @@ function print(suppress) {
 function flush(cb) {
   var i
     , chunk
-    , node;
+    , node
+    , j = this.nodes.length;
+
+  //console.error(j)
+
+  while(j--) {
+    chunk = this.nodes[j];
+    //console.error(chunk.type);
+    if(Node.is(chunk, Node.LIST)) {
+      chunk._lastLineBlank = true; 
+      break;
+    }
+  }
+
   if(this.standalone) {
     this.print();
   }else{
@@ -246,6 +239,31 @@ function getListData(type, padding, bulletChar) {
       markerOffset: 0
     }
   }
+}
+
+function gfm(text) {
+  text = text.toLowerCase();
+  text = text.replace(/[^A-Z0-9a-z _-]/g, '');
+  text = text.replace(/( )/g, '-');
+  text = text.replace(/-{2,}/g, '-');
+  return text;
+}
+
+function destination(literal) {
+  if(!this.seen) {
+    this.seen = {}; 
+  }
+
+  var str = gfm(literal);
+  if(this.seen[str]) {
+    str += '-' + this.seen[str];
+  }
+  if(!this.seen[str]) {
+    this.seen[str] = 1; 
+  }else{
+    this.seen[str]++;
+  }
+  return '#' + str;
 }
 
 Toc.prototype.print = print;

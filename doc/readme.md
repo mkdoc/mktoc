@@ -6,7 +6,9 @@
 
 <? @include {=readme} install.md ?>
 
+***
 <!-- @toc -->
+***
 
 ## Usage
 

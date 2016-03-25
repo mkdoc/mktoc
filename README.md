@@ -14,17 +14,20 @@ npm i mktoc --save
 
 For the command line interface install [mkdoc][] globally (`npm i -g mkdoc`).
 
-- [Contents Index](#contents-index)
-   - [Install](#install)
-   - [Usage](#usage)
-   - [Example](#example)
-   - [Help](#help)
-   - [API](#api)
-     - [toc](#toc)
-       - [Options](#options)
-     - [Toc](#toc-1)
-       - [Options](#options-1)
-   - [License](#license)
+---
+
+- [Install](#install)
+- [Usage](#usage)
+- [Example](#example)
+- [Help](#help)
+- [API](#api)
+   - [toc](#toc)
+     - [Options](#options)
+   - [Toc](#toc-1)
+     - [Options](#options-1)
+- [License](#license)
+
+---
 
 ## Usage
 
@@ -68,6 +71,7 @@ Generates a table of contents index.
 
   -t, --title=[TITLE]  Set initial heading
   -l, --level=[NUM]    Set initial heading level
+  -d, --depth=[NUM]    Ignore headings below a depth
   -s, --standalone     Create standalone index
   -h, --help           Display this help and exit
   --version            Print the version and exit
