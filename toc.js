@@ -8,7 +8,9 @@ var through = require('through3')
   , BULLET_HYPHEN = '-'
   , BULLET_PLUS = '+'
   , BULLET_STAR = '*'
-  , HASH = '#';
+  , HASH = '#'
+  , DELIMITER_PAREN = ')'
+  , DELIMITER_DOT = '.';
 
 /**
  *  Create a table of contents index stream.
@@ -75,9 +77,15 @@ function Toc(opts) {
   this.prefix = typeof opts.prefix === 'string' ? opts.prefix : HASH;
   this.base = typeof opts.base === 'string' ? opts.base : '';
 
-  this.bulletChar = opts.bullet === BULLET_HYPHEN
+  this.bulletChar = 
+    opts.bullet === BULLET_HYPHEN
     || opts.bullet === BULLET_PLUS
     || opts.bullet === BULLET_STAR ? opts.bullet : BULLET_HYPHEN;
+
+  this.delimiter = 
+    opts.delimiter === DELIMITER_DOT
+    || opts.delimiter === DELIMITER_PAREN ? opts.delimiter : DELIMITER_PAREN;
+
 
   // document to hold the TOC list
   this.doc = Node.createDocument();
@@ -302,13 +310,11 @@ function getListData(level, padding, markerOffset) {
   }
 
   if(this.counters) {
-    var delimiter = '.';
-
     data._listData.start = this.counters[level]; 
-    data._listData.delimiter = delimiter;
-
+    data._listData.delimiter = this.delimiter;
     // the +1 accounts for the single space
-    data._listData.padding = (this.counters[level] + delimiter).length + 1;
+    data._listData.padding = 
+      (this.counters[level] + this.delimiter).length + 1;
   }else{
     data._listData.bulletChar = this.bulletChar;
   }

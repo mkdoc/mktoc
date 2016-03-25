@@ -23,3 +23,9 @@ Only include headings for levels 2-4:
 ```shell
 mkcat readme.md | mktoc -d 2 -m 4 | mkout > README.md
 ```
+
+Create an ordered list and set the delimiter:
+
+```shell
+mkcat readme.md | mktoc -o -E '.' | mkout > README.md
+```

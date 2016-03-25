@@ -72,6 +72,12 @@ Only include headings for levels 2-4:
 mkcat readme.md | mktoc -d 2 -m 4 | mkout > README.md
 ```
 
+Create an ordered list and set the delimiter:
+
+```shell
+mkcat readme.md | mktoc -o -E '.' | mkout > README.md
+```
+
 ## Help
 
 ```
@@ -79,16 +85,19 @@ mktoc [options]
 
 Generates a table of contents index.
 
-  -t, --title=[TITLE]  Set initial heading
-  -l, --level=[NUM]    Set level for initial heading
-  -d, --depth=[LEVEL]  Ignore headings below LEVEL
-  -m, --max=[LEVEL]    Ignore headings above LEVEL
-  -p, --prefix=[VAL]   Set link destination prefix to VAL
-  -b, --base=[URL]     Base URL for absolute links
-  -D, --disable        Disable automatic links
-  -s, --standalone     Standalone index, discards input
-  -h, --help           Display this help and exit
-  --version            Print the version and exit
+  -t, --title=[TITLE]     Set initial heading
+  -l, --level=[NUM]       Set level for initial heading
+  -d, --depth=[LEVEL]     Ignore headings below LEVEL
+  -m, --max=[LEVEL]       Ignore headings above LEVEL
+  -p, --prefix=[VAL]      Set link destination prefix to VAL
+  -b, --base=[URL]        Base URL for absolute links
+  -B, --bullet=[CHAR]     Character for bullet lists
+  -E, --delimiter=[CHAR]  Delimiter for ordered lists
+  -D, --disable           Disable automatic links
+  -o, --ordered           Create an ordered list
+  -s, --standalone        Standalone index, discards input
+  -h, --help              Display this help and exit
+  --version               Print the version and exit
 
 Report bugs to https://github.com/mkdoc/mktoc/issues
 ```
