@@ -85,6 +85,7 @@ Generates a table of contents index.
   -m, --max=[LEVEL]    Ignore headings above LEVEL
   -p, --prefix=[VAL]   Set link destination prefix to VAL
   -b, --base=[URL]     Base URL for absolute links
+  -D, --disable        Disable automatic links
   -s, --standalone     Standalone index, discards input
   -h, --help           Display this help and exit
   --version            Print the version and exit
