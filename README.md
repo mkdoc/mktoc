@@ -71,6 +71,7 @@ Generates a table of contents index.
   -l, --level=[NUM]    Set level for initial heading
   -d, --depth=[LEVEL]  Ignore headings below LEVEL
   -m, --max=[LEVEL]    Ignore headings above LEVEL
+  -b, --base=[URL]     Base URL for absolute links
   -s, --standalone     Standalone index, discards input
   -h, --help           Display this help and exit
   --version            Print the version and exit
@@ -106,13 +107,33 @@ new Toc([opts])
 
 Create a table of contents index stream.
 
+Note that in order to build a complete index all data must be read so this
+implementation buffers incoming nodes and flushes them when the stream
+is ended writing the index nodes where necessary.
+
+If the `standalone` option is given then the incoming data is discarded
+and the document representing the index is flushed.
+
+When a `destination` function is specified it is passed a string
+literal of the heading text and should return a URL, the function is
+invoked in the scope of this stream.
+
+Typically `prefix` will be either a `/`, `#` or the empty string
+depending upon whether you want absolute, anchor or relative links. The
+default is to use `#` for anchor links on the same page.
+
 * `opts` Object processing options.
 
 #### Options
 
 * `standalone` Boolean discard incoming data.
 * `type` String=bullet list output type, `bullet` or `ordered`.
-* `link` Booleani=true whether to create links in the output lists.
+* `link` Boolean=true whether to create links in the output lists.
+* `depth` Number=1 ignore headings below this level.
+* `max` Number=6 ignore headings above this level.
+* `destination` Function builds the link URLs.
+* `prefix` String=# default link prefix.
+* `base` String a base path for absolute links.
 
 ## License
 
