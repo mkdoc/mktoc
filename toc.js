@@ -225,7 +225,6 @@ function flush(cb) {
         && (chunk.htmlBlockType === 2 || chunk._htmlBlockType === 2)
         && chunk.literal
         && ~chunk.literal.indexOf(MARKER)) {
-
         // consume the TOC nodes so nothing is printed at the end
         while((node = this.nodes.shift())) {
           this.push(node);
