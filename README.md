@@ -60,6 +60,12 @@ Set an initial heading with the specified level:
 mkcat readme.md | mktoc --title 'Table of Contents' --level 2 | mkout > README.md
 ```
 
+Only include headings for levels 2-4:
+
+```shell
+mkcat readme.md | mktoc -d 2 -m 4 | mkout > README.md
+```
+
 ## Help
 
 ```
