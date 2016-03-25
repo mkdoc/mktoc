@@ -5,6 +5,9 @@ var through = require('through3')
   , MARKER = '@toc'
   , ORDERED = 'ordered'
   , BULLET = 'bullet'
+  , BULLET_HYPHEN = '-'
+  , BULLET_PLUS = '+'
+  , BULLET_STAR = '*'
   , HASH = '#';
 
 /**
@@ -36,6 +39,7 @@ var through = require('through3')
  *  @option {Function} [destination] builds the link URLs.
  *  @option {String=#} [prefix] default link prefix.
  *  @option {String} [base] a base path for absolute links.
+ *  @option {String=-} [bullet] character for bullet lists.
  */
 function Toc(opts) {
 
@@ -64,6 +68,10 @@ function Toc(opts) {
 
   this.prefix = typeof opts.prefix === 'string' ? opts.prefix : HASH;
   this.base = typeof opts.base === 'string' ? opts.base : '';
+
+  this.bulletChar = opts.bullet === BULLET_HYPHEN
+    || opts.bullet === BULLET_PLUS
+    || opts.bullet === BULLET_STAR ? opts.bullet : BULLET_HYPHEN;
 
   // document to hold the TOC list
   this.doc = Node.createDocument();
@@ -261,19 +269,20 @@ function flush(cb) {
   cb();
 }
 
-function getListData(type, padding, bulletChar) {
+function getListData(type, padding) {
   return {
     _listData: {
-      type: type || 'bullet',
+      type: type || BULLET,
       tight: true,
-      bulletChar: bulletChar || '-',
+      bulletChar: this.bulletChar,
       padding: padding || 2,
       markerOffset: 0
     }
   }
 }
 
-function gfm(text) {
+// github style automatic header identifiers
+function gh(text) {
   text = text.toLowerCase();
   text = text.replace(/[^A-Z0-9a-z _-]/g, '');
   text = text.replace(/( )/g, '-');
@@ -281,12 +290,12 @@ function gfm(text) {
   return text;
 }
 
+// default destination function
 function destination(literal) {
   if(!this.seen) {
     this.seen = {}; 
   }
-
-  var str = gfm(literal);
+  var str = gh(literal);
   if(this.seen[str]) {
     str += '-' + this.seen[str];
   }
