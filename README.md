@@ -27,14 +27,16 @@ ast.src('# Heading\n\n## Sub Heading\n\n')
   .pipe(process.stdout);
 ```
 
-- Contents Index
-   - Install
-   - Usage
-   - Help
-   - API
-     - toc
-       - Options
-   - License
+- [Contents Index](#contents-index)
+   - [Install](#install)
+   - [Usage](#usage)
+   - [Help](#help)
+   - [API](#api)
+     - [toc](#toc)
+       - [Options](#options)
+         - [Options](#options-1)
+     - [Toc](#toc-1)
+     - [License](#license)
 
 ## Help
 
@@ -71,6 +73,22 @@ Returns an output stream.
 
 * `input` Readable input stream.
 * `output` Writable output stream.
+
+### Toc
+
+```javascript
+new Toc([opts])
+```
+
+Create a table of contents index stream.
+
+* `opts` Object processing options.
+
+#### Options
+
+* `standalone` Boolean discard incoming data.
+* `type` String=bullet list output type, `bullet` or `ordered`.
+* `link` Booleani=true whether to create links in the output lists.
 
 ## License
 

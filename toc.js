@@ -1,8 +1,51 @@
 var through = require('through3')
   , mkast = require('mkast')
   , Node = mkast.Node
-  , collect = mkast.NodeWalker.collect;
+  , collect = mkast.NodeWalker.collect
+  , MARKER = '@toc';
 
+function gfm(text) {
+  text = text.toLowerCase();
+  //console.log('gfm start %s', text);
+  text = text.replace(/[^A-Z0-9a-z _-]/g, '');
+  //console.log('gfm after strip %s', text);
+  text = text.replace(/( )/g, '-');
+  text = text.replace(/-{2,}/g, '-');
+  //console.log('gfm final %s', text);
+  return text;
+}
+
+function destination(literal) {
+  console.error(literal)
+  if(!this.seen) {
+    this.seen = {}; 
+  }
+
+  var str = gfm(literal);
+
+  if(this.seen[str]) {
+    str += '-' + this.seen[str];
+  }
+
+  if(!this.seen[str]) {
+    this.seen[str] = 1; 
+  }else{
+    this.seen[str]++;
+  }
+
+  return '#' + str;
+}
+
+/**
+ *  Create a table of contents index stream.
+ *
+ *  @constructor Toc
+ *  @param {Object} [opts] processing options.
+ *
+ *  @option {Boolean} [standalone] discard incoming data.
+ *  @option {String=bullet} [type] list output type, `bullet` or `ordered`.
+ *  @option {Booleani=true} [link] whether to create links in the output lists.
+ */
 function Toc(opts) {
 
   // when standalone all other data apart from the generated TOC
@@ -13,6 +56,9 @@ function Toc(opts) {
   this.type = opts.type === 'ordered' || opts.type === 'bullet'
     ? opts.type : 'bullet';
 
+  // do we create links, calls destination()
+  this.link = opts.link !== undefined ? opts.link : true;
+
   // document to hold the TOC list
   this.doc = Node.createDocument();
 
@@ -21,6 +67,10 @@ function Toc(opts) {
 
   // nodes to push() between document and EOF
   this.nodes = [];
+
+  var dest = typeof opts.destination === 'function'
+    ? opts.destination : destination;
+  this.destination = dest.bind(this);
 
   // if user specifed a title then append it to the beginning
   if(opts.title) {
@@ -57,7 +107,11 @@ function transform(chunk, encoding, cb) {
     // collection of child text nodes
     , text
     // current target item or list
-    , target;
+    , target
+    // literal string of all text nodes
+    , literal = ''
+    // encapsulating link when `link` option is set
+    , link;
 
   item = Node.createNode(Node.ITEM, this.getListData(this.type));
 
@@ -71,9 +125,22 @@ function transform(chunk, encoding, cb) {
 
     text = collect(chunk, Node.TEXT);
 
+    if(this.link) {
+      link = Node.createNode(Node.LINK);
+      //link.appendChild(para);
+      para = link;
+    }
+
     text.forEach(function(txt) {
+      literal += txt.literal;
       para.appendChild(Node.deserialize(txt));
     })
+
+    if(link) {
+      link.destination = this.destination(literal);
+    }
+
+    //console.error(literal)
 
     item.appendChild(para);
 
@@ -107,6 +174,7 @@ function transform(chunk, encoding, cb) {
             target = target.parent; 
           }
           target.appendChild(list);
+          //target = list;
         }
       }
 
@@ -156,7 +224,7 @@ function flush(cb) {
       if(Node.is(chunk, Node.HTML_BLOCK)
         && (chunk.htmlBlockType === 2 || chunk._htmlBlockType === 2)
         && chunk.literal
-        && ~chunk.literal.indexOf('@toc')) {
+        && ~chunk.literal.indexOf(MARKER)) {
 
         // consume the TOC nodes so nothing is printed at the end
         while((node = this.nodes.shift())) {
