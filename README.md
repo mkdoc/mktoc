@@ -137,6 +137,8 @@ default is to use `#` for anchor links on the same page.
 
 If the `bullet` option is given it must be one of `-`, `+` or `*`.
 
+Note that when creating links inline markup in the heading will be lost.
+
 * `opts` Object processing options.
 
 #### Options

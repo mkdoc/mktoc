@@ -30,6 +30,8 @@ var through = require('through3')
  *
  *  If the `bullet` option is given it must be one of `-`, `+` or `*`.
  *
+ *  Note that when creating links inline markup in the heading will be lost.
+ *
  *  @constructor Toc
  *  @param {Object} [opts] processing options.
  *
@@ -120,9 +122,7 @@ function transform(chunk, encoding, cb) {
     // current target item or list
     , target
     // literal string of all text nodes
-    , literal = ''
-    // encapsulating link when `link` option is set
-    , link;
+    , literal = '';
 
   if(!this.standalone) {
     this.input.push(chunk); 
@@ -145,13 +145,12 @@ function transform(chunk, encoding, cb) {
       return cb();
     }
 
-    container = Node.createNode(Node.PARAGRAPH);
-
     text = collect(chunk, Node.TEXT);
 
     if(this.link) {
-      link = Node.createNode(Node.LINK);
-      container = link;
+      container = Node.createNode(Node.LINK);
+    }else{
+      container = Node.createNode(Node.PARAGRAPH);
     }
 
     text.forEach(function(txt) {
@@ -159,8 +158,8 @@ function transform(chunk, encoding, cb) {
       container.appendChild(Node.deserialize(txt));
     })
 
-    if(link) {
-      link.destination = this.destination(literal);
+    if(this.link) {
+      container.destination = this.destination(literal);
     }
 
     item.appendChild(container);
