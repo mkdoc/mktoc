@@ -22,14 +22,14 @@ For the command line interface install [mkdoc][] globally (`npm i -g mkdoc`).
 
 ---
 
-1. [Install](https://github.com/mkdoc/mktoc/blob/master/)
-2. [Usage](#usage)
-3. [Example](#example)
-4. [Help](#help)
-5. [API](#api)
-   1. [toc](#toc)
-   2. [Toc](#toc-1)
-6. [License](#license)
+- [Install](https://github.com/mkdoc/mktoc/blob/master/)
+- [Usage](#usage)
+- [Example](#example)
+- [Help](#help)
+- [API](#api)
+   - [toc](#toc)
+   - [Toc](#toc-1)
+- [License](#license)
 
 ---
 

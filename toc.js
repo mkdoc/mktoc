@@ -55,8 +55,7 @@ function Toc(opts) {
     ? opts.standalone : false;
 
   this.type = opts.type === ORDERED || opts.type === BULLET
-    ? opts.type : ORDERED;
-    //? opts.type : BULLET;
+    ? opts.type : BULLET;
 
   // do we create links, calls destination()
   this.link = opts.link !== undefined ? opts.link : true;
