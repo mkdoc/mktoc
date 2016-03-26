@@ -184,14 +184,20 @@ function transform(chunk, encoding, cb) {
         container = Node.createNode(Node.LINK);
       }else{
         container = Node.createNode(Node.PARAGRAPH);
+
+        var next = chunk.firstChild;
+        while(next) {
+          container.appendChild(Node.deserialize(next));
+          next = next.next; 
+        }
       }
 
-      text.forEach(function(txt) {
-        literal += txt.literal;
-        container.appendChild(Node.deserialize(txt));
-      })
-
       if(this.link) {
+        text.forEach(function(txt) {
+          literal += txt.literal;
+          container.appendChild(Node.deserialize(txt));
+        })
+
         container.destination = this.destination(literal);
       }
 
