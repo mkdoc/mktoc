@@ -1,7 +1,7 @@
 var through = require('through3')
-  , mkast = require('mkast')
-  , Node = mkast.Node
-  , collect = mkast.NodeWalker.collect
+  , ast = require('mkast')
+  , Node = ast.Node
+  , collect = ast.NodeWalker.collect
   , MARKER = '@toc'
   , ORDERED = 'ordered'
   , BULLET = 'bullet'
