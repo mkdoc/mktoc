@@ -177,7 +177,7 @@ MIT
 
 ---
 
-*Created by [mkdoc](https://github.com/mkdoc/mkdoc) on March 25, 2016*
+Created by [mkdoc](https://github.com/mkdoc/mkdoc) on March 26, 2016
 
 [mkdoc]: https://github.com/mkdoc/mkdoc
 [commonmark]: http://commonmark.org
