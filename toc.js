@@ -224,7 +224,7 @@ function transform(chunk, encoding, cb) {
         }else{
           var diff = this.level - chunk.level;
           target = this.current.parent;
-          while(--diff) {
+          while(--diff && target.parent) {
             target = target.parent; 
           }
           target.appendChild(list);
@@ -235,7 +235,6 @@ function transform(chunk, encoding, cb) {
 
       target.appendChild(item);
     }
-
 
     // store current level
     this.level = chunk.level;
