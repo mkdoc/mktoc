@@ -353,14 +353,11 @@ function destination(literal) {
     this.seen = {}; 
   }
   var str = gh(literal);
-  if(this.seen[str]) {
+  if(this.seen[str] !== undefined) {
+    this.seen[str]++;
     str += '-' + this.seen[str];
   }
-  if(!this.seen[str]) {
-    this.seen[str] = 1; 
-  }else{
-    this.seen[str]++;
-  }
+  this.seen[str] = 0; 
   return this.base + this.prefix + str;
 }
 
