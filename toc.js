@@ -110,7 +110,7 @@ function Toc(opts) {
     this.nodes.push(title);
   }
 
-  // current list of item
+  // current list or item
   this.current = null;
 
   // current level
@@ -123,9 +123,6 @@ function Toc(opts) {
   // root list for the hierarchy - should come after `counters`
   // so that the ordered list data is correct
   this.list = Node.createNode(Node.LIST, this.getListData(1, 0));
-
-  // has the root list been pushed
-  this.pushed = false;
 }
 
 /**
@@ -159,9 +156,9 @@ function transform(chunk, encoding, cb) {
       return cb(); 
     }
 
-    if(!this.pushed) {
+    if(!this.current) {
       this.nodes.push(this.list);
-      this.pushed = true;
+      this.current = this.list;
     }
 
     if(this.counters) {
@@ -218,7 +215,7 @@ function transform(chunk, encoding, cb) {
       this.current = item;
     // other headings look for parents
     }else{
-      target = this.current || this.list;
+      target = this.current;
 
       if(chunk.level !== this.level) {
         list = Node.createNode(Node.LIST, this.getListData(chunk.level));
@@ -251,6 +248,8 @@ function transform(chunk, encoding, cb) {
 
 /**
  *  Print the index document to the stream.
+ *
+ *  @private
  */
 function print() {
 
@@ -271,6 +270,11 @@ function print() {
   this.push(Node.createNode(Node.EOF));
 }
 
+/**
+ *  Flush the data when the stream ends.
+ *
+ *  @private
+ */
 function flush(cb) {
   var i
     , chunk
