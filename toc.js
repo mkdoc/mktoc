@@ -119,6 +119,8 @@ function Toc(opts) {
   if(this.type === ORDERED) {
     this.counters = []; 
   }
+
+  this.currentDepth = 0;
 }
 
 /**
@@ -128,10 +130,8 @@ function Toc(opts) {
  */
 function transform(chunk, encoding, cb) {
 
-  // new list
-  var list
-    // list item
-    , item
+  // list item
+  var item
     // container element: paragraph or link
     , container
     // collection of child text nodes
@@ -203,10 +203,11 @@ function transform(chunk, encoding, cb) {
       item.appendChild(container);
     }
 
-    // level 1 headings go into primary list
+    // top level headings go into primary list
     if(chunk.level === this.depth) {
       // coming back from deeper - create a new list
       if(this.level > this.depth) {
+        this.currentDepth++;
         this.list = this.getList(chunk);
         this.nodes.push(this.list);
       }
@@ -216,28 +217,33 @@ function transform(chunk, encoding, cb) {
     }else{
       target = this.current;
 
-      if(chunk.level !== this.level) {
-
-        // create a new list
-        list = this.getList(chunk);
-        this.current.appendChild(list);
-
-        // descending into a nested level
-        if(chunk.level > this.level) {
-          target = this.current = list;
-        // ascending back up level(s)
-        }else{
-          var diff = this.level - chunk.level;
-          target = this.current.parent;
-          while(--diff && target.parent) {
-            target = target.parent;
-          }
-          target.appendChild(list);
-          this.current = target;
+      // same level - append item to current target list
+      if(chunk.level === this.level) {
+        this.current.appendChild(item);
+      // descending into a nested level - create a new list
+      }else if(chunk.level > this.level) {
+        this.currentDepth++;
+        target = this.getList(chunk);
+        this.current.appendChild(target);
+        target.appendChild(item);
+        this.current = target;
+      // ascending back up levels - find or create list
+      }else{
+        this.currentDepth--;
+        var diff = this.level - chunk.level;
+        target = this.current.parent;
+        while(--diff) {
+          target = target.parent;
         }
+        if(!target) {
+          var lvl = chunk.level - 1;
+          if(this.lists[lvl] && this.lists[lvl].length) {
+            target = this.lists[lvl][this.lists[lvl].length - 1];
+          }
+        }
+        target.appendChild(item);
+        this.current = target;
       }
-
-      target.appendChild(item);
     }
 
     // store current level
@@ -320,8 +326,8 @@ function getList(header, padding, markerOffset) {
   this.lists = this.lists || [];
   var data = this.getListData(header.level, padding, markerOffset)
     , list = Node.createNode(Node.LIST, data);
-  this.lists[header.level] = this.lists[header.level] || [];
-  this.lists[header.level].push(list);
+  this.lists[this.currentDepth] = this.lists[this.currentDepth] || [];
+  this.lists[this.currentDepth].push(list);
   return list;
 }
 
@@ -336,6 +342,8 @@ function getListData(level, padding, markerOffset) {
     _listData: {
       type: this.type,
       tight: true,
+      // NOTE: extend the listData with this field
+      level: level,
       padding: padding !== undefined ? padding : 2,
       markerOffset: markerOffset || 0
     }
