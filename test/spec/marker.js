@@ -21,7 +21,7 @@ describe('mktoc:', function() {
       , opts = {
           input: input,
           output: output
-      };
+        };
     
     mktoc(opts);
 

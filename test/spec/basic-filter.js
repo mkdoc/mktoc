@@ -24,7 +24,7 @@ describe('mktoc:', function() {
           standalone: true,
           depth: 2,
           max: 3
-      };
+        };
     
     mktoc(opts);
 

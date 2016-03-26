@@ -7,9 +7,9 @@ var expect = require('chai').expect
 
 describe('mktoc:', function() {
 
-  it('should create toc for basic headings', function(done) {
-    var source = 'test/fixtures/basic.md'
-      , target = 'target/basic.json.log'
+  it('should descend to parent lists', function(done) {
+    var source = 'test/fixtures/descend.md'
+      , target = 'target/descend.json.log'
       , data = ast.parse('' + fs.readFileSync(source))
 
     // mock file for correct relative path
@@ -21,9 +21,7 @@ describe('mktoc:', function() {
       , opts = {
           input: input,
           output: output,
-          standalone: true,
-          type: 'ordered',
-          delimiter: '.'
+          standalone: true
         };
     
     mktoc(opts);
@@ -31,22 +29,22 @@ describe('mktoc:', function() {
     output.once('finish', function() {
       var result = utils.result(target);
 
-      //console.dir(result)
+      //console.error(result)
 
       // open document
       expect(result[0].type).to.eql(Node.DOCUMENT);
 
-      // list data
+      // list data: two lists because two h1 elements
       expect(result[1].type).to.eql(Node.LIST);
-      expect(result[1].lastLineBlank).to.eql(true);
+      expect(result[1].lastLineBlank).to.eql(false);
 
-      expect(result[1].listData).to.be.an('object');
-      expect(result[1].listData.tight).to.eql(true);
-      expect(result[1].listData.padding).to.eql(0);
-      expect(result[1].listData.delimiter).to.eql(opts.delimiter);
+      expect(result[2].type).to.eql(Node.LIST);
+      expect(result[2].lastLineBlank).to.eql(true);
+      expect(result[2].firstChild.firstChild.firstChild.literal)
+        .to.eql('6');
 
       // eof
-      expect(result[2].type).to.eql(Node.EOF);
+      expect(result[3].type).to.eql(Node.EOF);
 
       done();
     })

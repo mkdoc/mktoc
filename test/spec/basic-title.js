@@ -23,7 +23,7 @@ describe('mktoc:', function() {
           output: output,
           standalone: true,
           title: 'Table of Contents'
-      };
+        };
     
     mktoc(opts);
 
@@ -68,7 +68,7 @@ describe('mktoc:', function() {
           standalone: true,
           title: 'Table of Contents',
           level: 2
-      };
+        };
     
     mktoc(opts);
 

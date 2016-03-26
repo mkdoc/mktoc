@@ -22,7 +22,7 @@ describe('mktoc:', function() {
           input: input,
           output: output,
           standalone: true
-      };
+        };
     
     mktoc(opts);
 

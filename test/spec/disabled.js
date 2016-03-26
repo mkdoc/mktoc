@@ -23,7 +23,7 @@ describe('mktoc:', function() {
           output: output,
           standalone: true,
           link: false
-      };
+        };
     
     mktoc(opts);
 

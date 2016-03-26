@@ -25,7 +25,7 @@ describe('mktoc:', function() {
             standalone: true,
             type: 'ordered',
             delimiter: '.'
-        };
+          };
       
       mktoc(opts);
 

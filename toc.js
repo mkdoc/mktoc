@@ -74,13 +74,16 @@ function Toc(opts) {
   this.max = typeof opts.max === 'number' && opts.max > 0
     ? opts.max : 6;
 
+  // set up default destination function
   var dest = typeof opts.destination === 'function'
     ? opts.destination : destination;
   this.destination = dest.bind(this);
 
+  // string base and prefix for URLs
   this.prefix = typeof opts.prefix === 'string' ? opts.prefix : HASH;
   this.base = typeof opts.base === 'string' ? opts.base : '';
 
+  // list character options
   this.bulletChar = 
     opts.bullet === BULLET_HYPHEN
     || opts.bullet === BULLET_PLUS
@@ -217,10 +220,7 @@ function transform(chunk, encoding, cb) {
     }else{
       target = this.current || this.list;
 
-      //if(Node.is(target, Node.ITEM)) {
       if(chunk.level !== this.level) {
-
-
         list = Node.createNode(Node.LIST, this.getListData(chunk.level));
         // descending into a nested level
         if(chunk.level > this.level) {
