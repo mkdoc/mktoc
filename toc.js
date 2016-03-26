@@ -232,7 +232,7 @@ function transform(chunk, encoding, cb) {
         this.currentDepth--;
         var diff = this.level - chunk.level;
         target = this.current.parent;
-        while(--diff) {
+        while(--diff && target) {
           target = target.parent;
         }
         if(!target) {
