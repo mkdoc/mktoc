@@ -7,7 +7,7 @@ var expect = require('chai').expect
 
 describe('mktoc:', function() {
 
-  it('should create toc for basic headings', function(done) {
+  it('should pass through input data', function(done) {
     var source = 'test/fixtures/basic.md'
       , target = 'target/basic.json.log'
       , data = ast.parse('' + fs.readFileSync(source))
@@ -20,10 +20,7 @@ describe('mktoc:', function() {
       , output = fs.createWriteStream(target)
       , opts = {
           input: input,
-          output: output,
-          standalone: true,
-          type: 'ordered',
-          delimiter: '.'
+          output: output
       };
     
     mktoc(opts);
@@ -31,22 +28,26 @@ describe('mktoc:', function() {
     output.once('finish', function() {
       var result = utils.result(target);
 
-      //console.dir(result)
-
       // open document
       expect(result[0].type).to.eql(Node.DOCUMENT);
 
-      // list data
-      expect(result[1].type).to.eql(Node.LIST);
-      expect(result[1].lastLineBlank).to.eql(true);
+      // input headings
+      expect(result[1].type).to.eql(Node.HEADING);
+      expect(result[2].type).to.eql(Node.HEADING);
+      expect(result[3].type).to.eql(Node.HEADING);
+      expect(result[4].type).to.eql(Node.HEADING);
+      expect(result[5].type).to.eql(Node.HEADING);
+      expect(result[6].type).to.eql(Node.HEADING);
 
-      expect(result[1].listData).to.be.an('object');
-      expect(result[1].listData.tight).to.eql(true);
-      expect(result[1].listData.padding).to.eql(0);
-      expect(result[1].listData.delimiter).to.eql(opts.delimiter);
+      // eof for input document
+      expect(result[7].type).to.eql(Node.EOF);
 
-      // eof
-      expect(result[2].type).to.eql(Node.EOF);
+      // open toc document
+      expect(result[8].type).to.eql(Node.DOCUMENT);
+      expect(result[9].type).to.eql(Node.LIST);
+
+      // eof for toc document
+      expect(result[10].type).to.eql(Node.EOF);
 
       done();
     })

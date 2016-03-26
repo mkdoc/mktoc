@@ -107,10 +107,6 @@ function Toc(opts) {
     this.nodes.push(title);
   }
 
-  // root list for the hierarchy
-  this.list = Node.createNode(Node.LIST, this.getListData(0));
-  this.nodes.push(this.list);
-
   // current list of item
   this.current = null;
 
@@ -120,6 +116,11 @@ function Toc(opts) {
   if(this.type === ORDERED) {
     this.counters = []; 
   }
+
+  // root list for the hierarchy - should come after `counters`
+  // so that the ordered list data is correct
+  this.list = Node.createNode(Node.LIST, this.getListData(1, 0));
+  this.nodes.push(this.list);
 }
 
 /**
@@ -316,9 +317,12 @@ function getListData(level, padding, markerOffset) {
   if(this.counters) {
     data._listData.start = this.counters[level]; 
     data._listData.delimiter = this.delimiter;
-    // the +1 accounts for the single space
-    data._listData.padding = 
-      (this.counters[level] + this.delimiter).length + 1;
+
+    if(this.counters[level] !== undefined) {
+      // the +1 accounts for the single space
+      data._listData.padding = 
+        (this.counters[level] + this.delimiter).length + 1;
+    }
   }else{
     data._listData.bulletChar = this.bulletChar;
   }
