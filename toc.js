@@ -120,7 +120,9 @@ function Toc(opts) {
   // root list for the hierarchy - should come after `counters`
   // so that the ordered list data is correct
   this.list = Node.createNode(Node.LIST, this.getListData(1, 0));
-  this.nodes.push(this.list);
+
+  // has the root list been pushed
+  this.pushed = false;
 }
 
 /**
@@ -152,6 +154,11 @@ function transform(chunk, encoding, cb) {
     // ignore these levels
     if(chunk.level < this.depth || chunk.level > this.max) {
       return cb(); 
+    }
+
+    if(!this.pushed) {
+      this.nodes.push(this.list);
+      this.pushed = true;
     }
 
     if(this.counters) {
@@ -280,7 +287,7 @@ function flush(cb) {
     for(i = 0;i < this.input.length;i++) {
       chunk = this.input[i];
       if(Node.is(chunk, Node.HTML_BLOCK)
-        && (chunk.htmlBlockType === 2 || chunk._htmlBlockType === 2)
+        && (chunk._htmlBlockType === 2 || chunk.htmlBlockType === 2)
         && chunk.literal
         && ~chunk.literal.indexOf(MARKER)) {
         // consume the TOC nodes so nothing is printed at the end
