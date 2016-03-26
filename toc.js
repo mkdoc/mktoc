@@ -119,10 +119,6 @@ function Toc(opts) {
   if(this.type === ORDERED) {
     this.counters = []; 
   }
-
-  // root list for the hierarchy - should come after `counters`
-  // so that the ordered list data is correct
-  this.list = Node.createNode(Node.LIST, this.getListData(1, 0));
 }
 
 /**
@@ -157,6 +153,9 @@ function transform(chunk, encoding, cb) {
     }
 
     if(!this.current) {
+      // this is a top-level list regardless of the depth
+      // so set padding to zero
+      this.list = this.getList(chunk, 0);
       this.nodes.push(this.list);
       this.current = this.list;
     }
@@ -185,6 +184,7 @@ function transform(chunk, encoding, cb) {
       }else{
         container = Node.createNode(Node.PARAGRAPH);
 
+        // preserve inline markup when not automatic linking
         var next = chunk.firstChild;
         while(next) {
           container.appendChild(Node.deserialize(next));
@@ -197,7 +197,6 @@ function transform(chunk, encoding, cb) {
           literal += txt.literal;
           container.appendChild(Node.deserialize(txt));
         })
-
         container.destination = this.destination(literal);
       }
 
@@ -208,7 +207,7 @@ function transform(chunk, encoding, cb) {
     if(chunk.level === this.depth) {
       // coming back from deeper - create a new list
       if(this.level > this.depth) {
-        this.list = Node.createNode(Node.LIST, this.getListData(chunk.level));
+        this.list = this.getList(chunk);
         this.nodes.push(this.list);
       }
       this.list.appendChild(item);
@@ -218,21 +217,23 @@ function transform(chunk, encoding, cb) {
       target = this.current;
 
       if(chunk.level !== this.level) {
-        list = Node.createNode(Node.LIST, this.getListData(chunk.level));
+
+        // create a new list
+        list = this.getList(chunk);
+        this.current.appendChild(list);
+
         // descending into a nested level
         if(chunk.level > this.level) {
-          target.appendChild(list);
           target = this.current = list;
         // ascending back up level(s)
         }else{
           var diff = this.level - chunk.level;
           target = this.current.parent;
           while(--diff && target.parent) {
-            target = target.parent; 
+            target = target.parent;
           }
           target.appendChild(list);
           this.current = target;
-
         }
       }
 
@@ -315,12 +316,22 @@ function flush(cb) {
   cb();
 }
 
+function getList(header, padding, markerOffset) {
+  this.lists = this.lists || [];
+  var data = this.getListData(header.level, padding, markerOffset)
+    , list = Node.createNode(Node.LIST, data);
+  this.lists[header.level] = this.lists[header.level] || [];
+  this.lists[header.level].push(list);
+  return list;
+}
+
 /**
  *  Get a list data object.
  *
  *  @private
  */
 function getListData(level, padding, markerOffset) {
+
   var data = {
     _listData: {
       type: this.type,
@@ -378,6 +389,7 @@ function destination(literal) {
 }
 
 Toc.prototype.print = print;
+Toc.prototype.getList = getList;
 Toc.prototype.getListData = getListData;
 
 module.exports = through.transform(transform, flush, {ctor: Toc});
