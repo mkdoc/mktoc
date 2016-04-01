@@ -42,7 +42,7 @@ describe('mktoc:', function() {
 
       expect(result[1].listData).to.be.an('object');
       expect(result[1].listData.tight).to.eql(true);
-      expect(result[1].listData.padding).to.eql(0);
+      expect(result[1].listData.padding).to.eql(2);
       expect(result[1].listData.delimiter).to.eql(opts.delimiter);
 
       // eof

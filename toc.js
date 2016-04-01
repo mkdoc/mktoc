@@ -153,9 +153,7 @@ function transform(chunk, encoding, cb) {
     }
 
     if(!this.current) {
-      // this is a top-level list regardless of the depth
-      // so set padding to zero
-      this.list = this.getList(chunk, 0);
+      this.list = this.getList(chunk);
       this.nodes.push(this.list);
       this.current = this.list;
     }
