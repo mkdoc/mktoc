@@ -27,8 +27,8 @@ For the command line interface install [mkdoc][] globally (`npm i -g mkdoc`).
 - [Example](#example)
 - [Help](#help)
 - [API](#api)
-   - [toc](#toc)
-   - [Toc](#toc-1)
+  - [toc](#toc)
+  - [Toc](#toc-1)
 - [License](#license)
 
 ---
@@ -81,10 +81,11 @@ mkcat readme.md | mktoc -o -E '.' | mkout > README.md
 ## Help
 
 ```
-mktoc [options]
+Usage: mktoc [options]
 
-Generates a table of contents index.
+  Generates a table of contents index.
 
+Options
   -t, --title=[TITLE]     Set initial heading
   -l, --level=[NUM]       Set level for initial heading
   -d, --depth=[LEVEL]     Ignore headings below LEVEL
@@ -96,10 +97,10 @@ Generates a table of contents index.
   -D, --disable           Disable automatic links
   -o, --ordered           Create an ordered list
   -s, --standalone        Standalone index, discards input
-  -h, --help              Display this help and exit
+  -h, --help              Display help and exit
   --version               Print the version and exit
 
-Report bugs to https://github.com/mkdoc/mktoc/issues
+mktoc@1.0.8
 ```
 
 ## API
@@ -177,7 +178,7 @@ MIT
 
 ---
 
-Created by [mkdoc](https://github.com/mkdoc/mkdoc) on March 26, 2016
+Created by [mkdoc](https://github.com/mkdoc/mkdoc) on April 18, 2016
 
 [mkdoc]: https://github.com/mkdoc/mkdoc
 [commonmark]: http://commonmark.org

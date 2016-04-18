@@ -16,13 +16,7 @@ By default it creates anchor links (`#`) to named anchors on the same page but t
 <!-- @toc -->
 ***
 
-## Usage
-
-Create the stream and write a [commonmark][] document:
-
-<? @source {javascript=s/\.\.\/index/mktoc/gm} usage.js ?>
-
-<? @include {=readme} example.md help.md ?>
+<? @include {=readme} usage.md example.md help.md ?>
 
 <? @exec mkapi index.js toc.js --title=API --level=2 ?>
 <? @include {=readme} license.md links.md ?>
