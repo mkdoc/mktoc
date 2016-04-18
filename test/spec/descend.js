@@ -36,7 +36,7 @@ describe('mktoc:', function() {
 
       // list data: two lists because two h1 elements
       expect(result[1].type).to.eql(Node.LIST);
-      expect(result[1].lastLineBlank).to.eql(false);
+      expect(result[1].lastLineBlank).to.eql(undefined);
 
       expect(result[2].type).to.eql(Node.LIST);
       expect(result[2].lastLineBlank).to.eql(true);
