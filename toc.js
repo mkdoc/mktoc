@@ -375,7 +375,7 @@ function slug(text) {
   text = text.toLowerCase();
   text = text.replace(/[^A-Z0-9a-z _-]/g, '');
   text = text.replace(/ /g, '-');
-  text = text.replace(/-{2,}/g, '-');
+  //text = text.replace(/-{2,}/g, '-');
   return text;
 }
 
