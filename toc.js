@@ -15,28 +15,28 @@ var through = require('through3')
 /**
  *  Create a table of contents index stream.
  *
- *  Note that in order to build a complete index all data must be read so this 
- *  implementation buffers incoming nodes and flushes them when the stream 
+ *  Note that in order to build a complete index all data must be read so this
+ *  implementation buffers incoming nodes and flushes them when the stream
  *  is ended writing the index nodes where necessary.
  *
- *  When the first child of a heading is a link it is preserved and no 
- *  automatic link is created, otherwise when creating links inline markup 
+ *  When the first child of a heading is a link it is preserved and no
+ *  automatic link is created, otherwise when creating links inline markup
  *  in the heading is discarded.
  *
- *  If the `standalone` option is given then the incoming data is discarded 
+ *  If the `standalone` option is given then the incoming data is discarded
  *  and the document representing the index is flushed.
  *
- *  When a `destination` function is specified it is passed a string 
- *  literal of the heading text and should return a URL, the function is 
- *  invoked in the scope of this stream.
+ *  When a `destination` function is specified it is passed a string
+ *  literal of the heading text and a reference to the `slug` function and
+ *  should return a URL, the function is invoked in the scope of this stream.
  *
- *  Typically `prefix` will be either a `/`, `#` or the empty string 
- *  depending upon whether you want absolute, anchor or relative links. The 
+ *  Typically `prefix` will be either a `/`, `#` or the empty string
+ *  depending upon whether you want absolute, anchor or relative links. The
  *  default is to use `#` for anchor links on the same page.
  *
  *  If the `bullet` option is given it must be one of `-`, `+` or `*`.
  *
- *  If the `delimiter` option is given it must a period `.` or right 
+ *  If the `delimiter` option is given it must a period `.` or right
  *  parenthesis `)`.
  *
  *  @constructor Toc
@@ -48,6 +48,7 @@ var through = require('through3')
  *  @option {Number=1} [depth] ignore headings below this level.
  *  @option {Number=6} [max] ignore headings above this level.
  *  @option {Function} [destination] builds the link URLs.
+ *  @option {Function} [slug] function to generate the slug id.
  *  @option {String=#} [prefix] default link prefix.
  *  @option {String} [base] a base path for absolute links.
  *  @option {String=-} [bullet] character for bullet lists.
@@ -57,7 +58,7 @@ function Toc(opts) {
 
   // when standalone all other data apart from the generated TOC
   // document is removed from the stream
-  this.standalone = opts.standalone !== undefined 
+  this.standalone = opts.standalone !== undefined
     ? opts.standalone : false;
 
   this.type = opts.type === ORDERED || opts.type === BULLET
@@ -79,17 +80,19 @@ function Toc(opts) {
     ? opts.destination : destination;
   this.destination = dest.bind(this);
 
+  this.slug = opts.slug || slug;
+
   // string base and prefix for URLs
   this.prefix = typeof opts.prefix === 'string' ? opts.prefix : HASH;
   this.base = typeof opts.base === 'string' ? opts.base : '';
 
   // list character options
-  this.bulletChar = 
+  this.bulletChar =
     opts.bullet === BULLET_HYPHEN
     || opts.bullet === BULLET_PLUS
     || opts.bullet === BULLET_STAR ? opts.bullet : BULLET_HYPHEN;
 
-  this.delimiter = 
+  this.delimiter =
     opts.delimiter === DELIMITER_DOT
     || opts.delimiter === DELIMITER_PAREN ? opts.delimiter : DELIMITER_PAREN;
 
@@ -117,7 +120,7 @@ function Toc(opts) {
   this.level = 0;
 
   if(this.type === ORDERED) {
-    this.counters = []; 
+    this.counters = [];
   }
 
   this.currentDepth = 0;
@@ -142,14 +145,14 @@ function transform(chunk, encoding, cb) {
     , literal = '';
 
   if(!this.standalone) {
-    this.input.push(chunk); 
+    this.input.push(chunk);
   }
 
   if(Node.is(chunk, Node.HEADING)) {
 
     // ignore these levels
     if(chunk.level < this.depth || chunk.level > this.max) {
-      return cb(); 
+      return cb();
     }
 
     if(!this.current) {
@@ -186,7 +189,7 @@ function transform(chunk, encoding, cb) {
         var next = chunk.firstChild;
         while(next) {
           container.appendChild(Node.deserialize(next));
-          next = next.next; 
+          next = next.next;
         }
       }
 
@@ -195,7 +198,7 @@ function transform(chunk, encoding, cb) {
           literal += txt.literal;
           container.appendChild(Node.deserialize(txt));
         })
-        container.destination = this.destination(literal);
+        container.destination = this.destination(literal, this.slug);
       }
 
       item.appendChild(container);
@@ -260,7 +263,7 @@ function print() {
 
   // nothing to do
   if(!this.nodes.length) {
-    return; 
+    return;
   }
 
   // document
@@ -289,7 +292,7 @@ function flush(cb) {
   while(j--) {
     chunk = this.nodes[j];
     if(Node.is(chunk, Node.LIST)) {
-      chunk._lastLineBlank = true; 
+      chunk._lastLineBlank = true;
       break;
     }
   }
@@ -348,12 +351,12 @@ function getListData(level, padding, markerOffset) {
   }
 
   if(this.counters) {
-    data._listData.start = this.counters[level]; 
+    data._listData.start = this.counters[level];
     data._listData.delimiter = this.delimiter;
 
     if(this.counters[level] !== undefined) {
       // the +1 accounts for the single space
-      data._listData.padding = 
+      data._listData.padding =
         (this.counters[level] + this.delimiter).length + 1;
     }
   }else{
@@ -368,7 +371,7 @@ function getListData(level, padding, markerOffset) {
  *
  *  @private
  */
-function gh(text) {
+function slug(text) {
   text = text.toLowerCase();
   text = text.replace(/[^A-Z0-9a-z _-]/g, '');
   text = text.replace(/ /g, '-');
@@ -381,16 +384,16 @@ function gh(text) {
  *
  *  @private
  */
-function destination(literal) {
+function destination(literal, slug) {
   if(!this.seen) {
-    this.seen = {}; 
+    this.seen = {};
   }
-  var str = gh(literal);
+  var str = slug(literal);
   if(this.seen[str] !== undefined) {
     this.seen[str]++;
     str += '-' + this.seen[str];
   }
-  this.seen[str] = 0; 
+  this.seen[str] = 0;
   return this.base + this.prefix + str;
 }
 
